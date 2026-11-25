@@ -1,7 +1,6 @@
 name: broadcast
+# Отключено: рассылка теперь работает на Cloudflare (вебхук), этот запуск только вручную.
 on:
-  schedule:
-    - cron: "*/10 * * * *"     # проверка лички бота: новые посты, кнопки, автоудаление
   workflow_dispatch:
 concurrency:
   group: broadcast
