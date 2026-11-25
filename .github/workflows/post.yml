@@ -1,0 +1,38 @@
+name: post-quizzes
+on:
+  schedule:
+    - cron: "3 4-15 * * *"     # раз в час 09:03–20:03 по Казахстану
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: "tick / check"
+        default: "tick"
+concurrency:
+  group: quizbot
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q -r requirements.txt
+      - name: Публикация викторин
+        env:
+          QUIZ_BOT_TOKEN: ${{ secrets.QUIZ_BOT_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python quizbot.py ${{ github.event.inputs.cmd || 'tick' }}
+      - name: Сохранить состояние
+        run: |
+          git config user.name "quizbot"
+          git config user.email "quizbot@users.noreply.github.com"
+          git add -A
+          git commit -m "tick $(date -u +%FT%H%M)" || exit 0
+          git pull --rebase -X ours || true
+          git push
