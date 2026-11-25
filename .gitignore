@@ -1,0 +1,4 @@
+refs.bin
+logs/
+__pycache__/
+.env
